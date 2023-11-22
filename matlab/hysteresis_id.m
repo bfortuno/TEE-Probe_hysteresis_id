@@ -15,7 +15,7 @@
 %
 % Dependencies:
 % - Functions: HystDataSimulation, hysteresis_id_cost, surrogateopt
-% - MATLAB Optimization Toolbox
+% - MATLAB Optimization Toolbox 
 %
 % Note: Ensure that the necessary functions and toolbox are available in
 % the MATLAB environment.
@@ -25,31 +25,28 @@ clc;
 clear all;
 close all;
 
-%% Measurements model
-N = 400;
+%% Read data from txt file
+curve = "postero_anterior"; 
+% curve = "antero_posterior"; 
 
-% Define a range of theta_i values
-x_liml = -55;
-x_limu = 99;
-phi = pi/3; % You can change this value
-s = 55;
-n = 10;
+file_path = curve + '.txt';
 
-% Generate KinetoDataSimulation
-[theta_i_values, g_values] = HystDataSimulation(N, x_liml, x_limu, phi, s, n);
+% Use the load function to read data from the text file
+data = load(file_path);
+data = sortrows(data,1)';
 
-% Separate theta and g values for X and Y axis optimization
-Xh = theta_i_values(1:2:end);
-X_val = theta_i_values(2:2:end);
-Yh = g_values(1, 1:2:end);
-Y_val = g_values(1, 2:2:end);
+% Assuming your file has two columns, assign them to x and y
+Xh = data(1, :);  % Assuming the first column contains x values
+Yh = data(2, :);  % Assuming the second column contains y values
+X_val = Xh;
+Y_val = Yh;
 
 %% X-axis Optimization
 n_var = 8;
 var_difference = 3;
 
 % Choose interpolation method
-solver = 'makima'; % You can change this value
+solver = 'splines'; % You can change this value
 x0 = round((0:n_var-1) * (N / 2 - 1) / (n_var - 1)) + 1;
 type = 'XF'; % X FIT
 
@@ -76,9 +73,9 @@ hold on
 grid on;
 plot(X_val, Y_val, 'r', 'LineWidth', 1.5);
 plot(X_val, Ys, 'b', 'LineWidth', 2);
-xlabel('\theta_i');
-ylabel('T(\theta_i)');
-title('Plot of T(\theta_i) for a Constant \phi');
+xlabel('\theta');
+ylabel('Motor Steps');
+title('Plot of Motor steps with respect to \theta');
 hold off
 
 %% Y-axis Optimization
@@ -113,9 +110,9 @@ hold on
 grid on;
 plot(X_val, Y_val, 'r', 'LineWidth', 1.5);
 plot(X_val, Ys, 'b', 'LineWidth', 2);
-xlabel('\theta_i');
-ylabel('T(\theta_i)');
-title('Plot of T(\theta_i) for a Constant \phi');
+xlabel('\theta');
+ylabel('Motor Steps');
+title('Plot of Motor steps with respect to \theta');
 hold off
 
 %% Save optimized parameters in 'PPModel.mat'
@@ -124,4 +121,33 @@ parentDir = fileparts(pwd);  % Get the current directory and navigate to its par
 pythonFolderPath = fullfile(parentDir, 'python');
 
 % Save the variable in the "python" folder
-save(fullfile(pythonFolderPath, 'PPModel.mat'), 'ss');
+file_path = curve + '_PPModel.mat';
+save(fullfile(pythonFolderPath, file_path), 'ss');
+save(file_path, 'ss');
+file_path = curve + '_measurements.mat';
+save(file_path, 'data');
+
+%% Plot everything together
+ss_ap = load("antero_posterior_PPModel.mat").ss;
+ss_pa = load("postero_anterior_PPModel.mat").ss;
+data_ap = load("antero_posterior_measurements.mat").data;
+data_pa = load("postero_anterior_measurements.mat").data;
+
+
+Yap = ppval(ss_ap, X_val);
+Ypa = ppval(ss_pa, X_val);
+Yap_meas = data_ap(2,:);
+Ypa_meas = data_pa(2,:);
+
+figure(1)
+clf
+hold on
+grid on;
+plot(X_val, Yap_meas, 'r', 'LineWidth', 1.5);
+plot(X_val, Yap, 'b', 'LineWidth', 2);
+plot(X_val, Ypa_meas, 'r', 'LineWidth', 1.5);
+plot(X_val, Ypa, 'b', 'LineWidth', 2);
+xlabel('\theta');
+ylabel('Motor Steps');
+title('Plot of Motor steps with respect to \theta');
+hold off

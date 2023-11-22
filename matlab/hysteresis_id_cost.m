@@ -60,11 +60,11 @@ hold on
 grid on;
 c1 = plot(X_val, Y_val, 'r', 'LineWidth', 1.5);
 c2 = plot(X_val,Ys,'b','LineWidth',2);
-xlabel('\theta_i');
-ylabel('T(\theta_i)');
-title('Plot of T(\theta_i) for a Constant \phi');
-xlim([min(X_val) - 5, max(X_val) + 5]);
-ylim([min(Y_val) - 0.02, max(Y_val) + 0.02]);
+xlabel('\theta');
+ylabel('Motor Steps');
+title('Plot of Motor steps with respect to \theta');
+xlim([min(X_val) - (max(X_val) - min(X_val))*0.03, max(X_val) + (max(X_val) - min(X_val))*0.03]);
+ylim([min(Y_val) - (max(Y_val) - min(Y_val))*0.03, max(Y_val) + (max(Y_val) - min(Y_val))*0.03]);
 hold off
 
 %% Compute sum of squared errors

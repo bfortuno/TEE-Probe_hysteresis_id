@@ -21,6 +21,8 @@ Usage:
 import scipy.io as spio
 import numpy as np
 from matplotlib import pyplot as plt
+from os import path
+
 
 def mkpp(breaks, coefs):
     """
@@ -46,6 +48,8 @@ def mkpp(breaks, coefs):
     return ppval
 
 def get_PPModel(filename='PPModel.mat'):
+    local = path.dirname(path.realpath(__file__))
+    filename = path.join(local, filename)
     ss = spio.loadmat(filename)
     ss = ss['ss'][0][0]
     breaks = ss[1][0]
@@ -54,12 +58,42 @@ def get_PPModel(filename='PPModel.mat'):
     pp = mkpp(breaks, coefs)
     return pp
 
+def hysteresis_model(filename1='antero_posterior_PPModel.mat', filename2='postero_anterior_PPModel.mat'):
+    pp1 = get_PPModel(filename1)
+    pp2 = get_PPModel(filename2)
+
+    def ppval(x, x_prev):
+        if x < x_prev:          # Antero-posterior: if x_prev is greater than x, then the probe is moving backward
+            return pp1(x)
+        elif x > x_prev:        # Postero-anterior: if x_prev is less than x, then the probe is moving forward
+            return pp2(x)
+        else:
+            raise ValueError('x and x_prev cannot be equal')
+
+    return ppval
+
 if __name__ == '__main__':
-    pp = get_PPModel()
+    pp = hysteresis_model()
 
     # Evaluate the piecewise polynomial at specific points
-    points_to_evaluate = np.linspace(-55, 96, 200)
-    y = [pp(x) for x in points_to_evaluate]
+    x = np.linspace(-54, 97, 10000)
+    x_min = np.linspace(-55, 96, 10000)
+    x_plus = np.linspace(-53, 98, 10000)
+    y_pa = [pp(x[i],x_min[i]) for i in range(x.size)]
+    y_ap = [pp(x[i],x_plus[i]) for i in range(x.size)]
 
-    plt.plot(points_to_evaluate, y)
+    # Plotting
+    plt.figure(figsize=(8, 6))
+
+    plt.plot(x, y_ap, label='Postero-anterior', linestyle='-', color='blue')
+    plt.plot(x, y_pa, label='Antero-posterior', linestyle='-', color='orange')
+
+    plt.title('TEE-Probe Hysteresis Model')
+    plt.xlabel('$\\theta$ (degrees)', fontsize=12)
+    plt.ylabel('steps', fontsize=12)
+    plt.legend()
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.savefig('hysteresis_plot.png')  # Save the plot as an image file
     plt.show()
