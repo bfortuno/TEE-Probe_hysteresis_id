@@ -1,3 +1,5 @@
 .python-version
 *.asv
 *.txt
+*.png
+*.jpg

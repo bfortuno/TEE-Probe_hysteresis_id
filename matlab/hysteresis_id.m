@@ -138,16 +138,30 @@ Yap = ppval(ss_ap, X_val);
 Ypa = ppval(ss_pa, X_val);
 Yap_meas = data_ap(2,:);
 Ypa_meas = data_pa(2,:);
+X_val = data_pa(1,:);
 
+% Plotting
 figure(1)
 clf
 hold on
 grid on;
-plot(X_val, Yap_meas, 'r', 'LineWidth', 1.5);
-plot(X_val, Yap, 'b', 'LineWidth', 2);
-plot(X_val, Ypa_meas, 'r', 'LineWidth', 1.5);
-plot(X_val, Ypa, 'b', 'LineWidth', 2);
+
+% Measured data
+plot(X_val, Yap_meas, 'color', [0.8500, 0.3250, 0.0980], 'LineWidth', 1.5); % Orange
+plot(X_val, Ypa_meas, 'color', [0, 0.4470, 0.7410], 'LineWidth', 1.5); % Bluish color
+
+% Fitted data
+plot(X_val, Yap, 'color', [0.4660, 0.6740, 0.1880], 'LineWidth', 2); % Green
+plot(X_val, Ypa, 'color', [0.4940, 0.1840, 0.5560], 'LineWidth', 2); % Purple
+
+% Customize the plot
 xlabel('\theta');
 ylabel('Motor Steps');
 title('Plot of Motor steps with respect to \theta');
+
+% Add legends
+legend('Yap_{measured}', 'Ypa_{measured}', 'Yap_{fitted}', 'Ypa_{fitted}', 'Location', 'Best');
+
+% Add annotations or additional information
+text(0.5, 1.5, 'Additional Information', 'FontSize', 12, 'Color', 'k');
 hold off
