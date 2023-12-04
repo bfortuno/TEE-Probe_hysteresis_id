@@ -27,11 +27,15 @@ The TEE-Probe_hysteresis_id project aims to optimize the identification of hyste
     pip install -r requirements.txt
 
 ## Usage
-1. Run the MATLAB identification code to generate the PPModel.mat file.
+1. Run the MATLAB calibration and data processing script: BP_calibration.m to find bending angles.
+   ```matlab
+    run BP_calibration.m
+    
+2. Run the MATLAB identification code to generate the PPModel.mat file.
    ```matlab
     run MATLAB_identification.m
 
-2. Use the generated PPModel.mat file in the Python code to recreate the identified curve.
+3. Use the generated PPModel.mat file in the Python code to recreate the identified curve.
    ```python
     python PPModel.py
 
